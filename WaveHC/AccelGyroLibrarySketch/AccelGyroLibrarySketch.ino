@@ -18,20 +18,9 @@
   SDA -------^^(330)^^------- A4
   SCL -------^^(330)^^------- A5
   GND ---------------------- GND
-  
-  Rev A0 - Kristen Villemez
-    Currently using TARDIS sounds from previous project as they are already formatted
-    correctly. Also, only an accelerometer is being used at this time. Need to purchase
-    gyroscope sensor and second accelerometer for use with this project.
-  
-  Rev A1 - Kristen Villemez
-    Introduced slower clock speed (8MHz as opposed to default 16MHz) to determine
-    effect on performance.
 */
 
 /////// BEGIN INSTANTIATIONS FOR SOUND GENERATION /////////
-#include <Wire.h> // Used for I2C
-
 #include <FatReader.h>
 #include <FatStructs.h>
 #include <mcpDac.h>
@@ -49,18 +38,8 @@ FatReader f;      // This holds the information for the file we're play
  
 WaveHC wave;      // This is the only wave (audio) object, since we will only play one at a time
 
-/////////// BEGIN INSTANTIATIONS FOR IMU ///////////
+/////////////////////// BEGIN FUNCTION DEFINITIONS /////////////////////////////
 
-
-#include <ADXL345.h>
-#include <ITG3200.h>
-#include <twi.h>
-#include <main.h>
-
-
-int accelGyroRaw[6] = {0,0,0,0,0,0};  // Stores the 12-bit signed value
-float accelGyroScaled[6] = {0,0,0,0,0,0};  // Stores the accel value in g's, 
- 
 // this handy function will return the number of bytes currently free in RAM, great for debugging!   
 int freeRam(void)
 {
@@ -86,7 +65,8 @@ void sdErrorCheck(void)
   Serial.println(card.errorData(), HEX);
   while(1);
 }
- 
+
+///////////// SETUP FUNCTION /////////////// 
 void setup() {
   // Prescale internal clock for slow-down (for use at 3.3V)
   CLKPR = 0x80;
@@ -94,12 +74,11 @@ void setup() {
   
   // set up serial port
   Serial.begin(9600);
-  Serial.println("TARDIS version of Parks Sabers Example Code");
+  Serial.println("WaveHC Example Code");
   
   Wire.begin(); //Join the bus as a master
   Serial.println("Hello!");
-//  initLSM6DS0(); // INSERT NEW ACCEL GYRO INITIALIZATIONS HERE
-
+  
   Serial.print("Free RAM: ");       // This can help with debugging, running out of RAM is bad
   Serial.println(freeRam());      // if this is under 150 bytes it may spell trouble!
   
@@ -157,11 +136,13 @@ void setup() {
   // Whew! We got past the tough parts.
   Serial.println("Ready!");
 }
- 
+
+/////////////////// LOOP FUNCTION ///////////////////////// 
 void loop() {
-//PROCESS DATA HERE  
+ // ADD ALL PROCESSING CODE HERE
+ // Use playcomplete("SOUND.WAV") or playfile("SOUND.WAV") to call a sound to play 
   Serial.println();
-  delay(100);
+  delay(100); // this delay is to simulate 100ms read increment
 }
 
 /////////// BEGIN WAVE SHIELD SUPPORT FUNCTIONS ///////////
