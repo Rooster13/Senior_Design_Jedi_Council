@@ -132,6 +132,8 @@ void loop() {
   sixDOF.getEuler(angles);
   float anglesTotal[3];
   float highestAngle;
+  float highestAngle2;
+  float changeInAngleTotals;
   
   Serial.print(angles[0]); 
   Serial.print(" | ");  
@@ -143,7 +145,7 @@ void loop() {
   anglesTotal[0] = abs(angles[0] - angles2[0]); //Gives total change in x axis
   anglesTotal[1] = abs(angles[1] - angles2[1]); //Gives total change in y axis
   anglesTotal[2] = abs(angles[2] - angles2[2]); //gives total change in z axis
-  
+  changeInAngleTotals = abs(highestAngle - highestAngle2);
 //  Serial.print("Angle Totals: ");   
 //  Serial.print(anglesTotal[0]);
 //  Serial.print(" | ");  
@@ -177,11 +179,39 @@ void loop() {
     }
   }
   
+  if(highestAngle <=13 && changeInAngleTotals > 20)
+  {
+    //play clash
+  }
+  else
+  {
+    if(highestAngle <=13)
+    {  
+      //code here for playing hum
+    }
+    if(highestAngle >13 && highestAngle <= 50)
+    {
+      //code here for play slow swing
+    }
+    if(highestAngle > 50 && highestAngle <= 100)
+    {
+      //play medium swing
+    }
+    if(highestAngle >100 && highestAngle <=200)
+    {
+      //play pretty fast swing
+    }
+    if(highestAngle > 200)
+    {
+      //play fastest swing
+    }
+  }
+  
 
   angles2[0] = angles[0]; //initializes x angle2 to the previous x angle for total
   angles2[1] = angles[1]; //initializes y angle2 to the previous y angle for total
   angles2[2] = angles[2]; //initializes z angle2 to the previous z angle for total
-  
+  highestAngle2 = highestAngle; //initializes change so we know whether to play hum or clash
   // Use playcomplete("SOUND.WAV") or playfile("SOUND.WAV") to call a sound to play 
   Serial.println();
   delay(100); // this delay is to simulate 100ms read increment
