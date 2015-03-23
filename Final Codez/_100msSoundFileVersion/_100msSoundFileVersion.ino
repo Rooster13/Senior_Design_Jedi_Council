@@ -177,35 +177,35 @@ void loop() {
    
   if(highestAngle1[0] <= value[0] && changeInAnglesTotals[0] > value[4])
   {
-    playfile("Clash1.WAV");
-    delay(200);
+    playfile("Clash2.WAV");
+    delay(175);
   }
   else
   {
     if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4])
     {  
-      playfile("Minus80.WAV");
-      delay(1000);
+      playfile("Minus801.WAV");
+      delay(75);
     }
     if(highestAngle1[0] <= value[1] && highestAngle1[0] > value[0])
     {
-      playfile("Minus40.WAV");
-      delay(1000);
+      playfile("Minus401.WAV");
+      delay(75);
     }
     if(highestAngle1[0] <= value[2] && highestAngle1[0] > value[1])
     {
-      playfile("Zero0.WAV");
-      delay(1000);
+      playfile("Zero1.WAV");
+      delay(75);
     }
     if(highestAngle1[0] <=value[3] && highestAngle1[0] > value[2])
     {
-      playfile("Plus40.WAV");
-      delay(1000);
+      playfile("Plus401.WAV");
+      delay(75);
     }
     if(highestAngle1[0] > value[3])
     {
-      playfile("Plus80.WAV");
-      delay(1000);
+      playfile("Plus801.WAV");
+      delay(75);
     }
   }
   
