@@ -38,6 +38,7 @@ FatReader f;      // This holds the information for the file we're play
  
 WaveHC wave;      // This is the only wave (audio) object, since we will only play one at a time
 
+
 /////////////////////// BEGIN FUNCTION DEFINITIONS /////////////////////////////
 
 // this handy function will return the number of bytes currently free in RAM, great for debugging!   
@@ -76,7 +77,6 @@ void setup() {
   Serial.begin(9600);
   Serial.println("WaveHC Example Code");
   
-  Wire.begin(); //Join the bus as a master
   Serial.println("Hello!");
   
   Serial.print("Free RAM: ");       // This can help with debugging, running out of RAM is bad
@@ -140,7 +140,7 @@ void setup() {
 /////////////////// LOOP FUNCTION ///////////////////////// 
 void loop() {
  // ADD ALL PROCESSING CODE HERE
- // Use playcomplete("SOUND.WAV") or playfile("SOUND.WAV") to call a sound to play 
+ playcomplete("Clash1.WAV");
   Serial.println();
   delay(100); // this delay is to simulate 100ms read increment
 }
