@@ -66,7 +66,7 @@ void sdErrorCheck(void)
 ///////////// SETUP FUNCTION /////////////// 
 void setup() {
   // Prescale internal clock for slow-down (for use at 3.3V)
- 
+  
   CLKPR = 0x80;
   CLKPR = 0x1;
  
@@ -78,7 +78,7 @@ void setup() {
   delay(5);
   sixDOF.init(); //begin the IMU
   delay(5);
-  
+  Serial.println("Hello2!");
   // Set the output pins for the DAC control. This pins are defined in the library
   pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
@@ -125,7 +125,7 @@ void setup() {
   }
   
   // Whew! We got past the tough parts.
- 
+
 }
 
 /////////////////// LOOP FUNCTION ///////////////////////// 
@@ -135,7 +135,7 @@ void loop() {
   float highestAngle1[1];
   float changeInAnglesTotals[1];
   float value[5];
-  
+ 
   value[0] = 30;
   value[1] = 50;
   value[2] = 100;
@@ -177,35 +177,35 @@ void loop() {
    
   if(highestAngle1[0] <= value[0] && changeInAnglesTotals[0] > value[4])
   {
-    playfile("Clash1.WAV");
+    playfile("C1.WAV");
     delay(200);
   }
   else
   {
     if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4])
     {  
-      playfile("Minus80.WAV");
-      delay(1000);
+      playfile("ME1.WAV");
+      delay(100);
     }
     if(highestAngle1[0] <= value[1] && highestAngle1[0] > value[0])
     {
-      playfile("Minus40.WAV");
-      delay(1000);
+      playfile("MF1.WAV");
+      delay(100);
     }
     if(highestAngle1[0] <= value[2] && highestAngle1[0] > value[1])
     {
-      playfile("Zero0.WAV");
-      delay(1000);
+      playfile("Zero1.WAV");
+      delay(100);
     }
     if(highestAngle1[0] <=value[3] && highestAngle1[0] > value[2])
     {
-      playfile("Plus40.WAV");
-      delay(1000);
+      playfile("PF1.WAV");
+      delay(100);
     }
     if(highestAngle1[0] > value[3])
     {
-      playfile("Plus80.WAV");
-      delay(1000);
+      playfile("PE1.WAV");
+      delay(100);
     }
   }
   

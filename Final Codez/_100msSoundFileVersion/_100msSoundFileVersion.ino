@@ -31,6 +31,13 @@
 #include <WavePinDefs.h>
 #include <WaveUtil.h>
 
+#define C1 "C1.WAV"
+#define ME1 "ME2.WAV"
+#define MF1 "MF2.WAV"
+#define Zero1 "Zero1.WAV"
+#define PE1 "PE2.WAV"
+#define PF1 "PF2.WAV"
+
 /////// BEGIN IMU INCLUDE STATEMENTS ///////////
 #include <FreeSixIMU.h>
 #include <FIMU_ADXL345.h>
@@ -43,7 +50,9 @@ SdReader card;    // This object holds the information for the card
 FatReader root;   // This holds the information for the filesystem on the card
 FatReader f;      // This holds the information for the file we're play 
 WaveHC wave;      // This is the only wave (audio) object, since we will only play one at a time
+WaveHC wave2;      // This is the only wave (audio) object, since we will only play one at a time
 FatVolume vol;    // This holds the information for the partition on the card 
+char *toplay, *toplay1;
 ////////// BEGIN IMU INSTANTIATIONS ///////////
 float angles[3]; // yaw pitch roll
 float angles2[3];
@@ -125,7 +134,7 @@ void setup() {
   }
   
   // Whew! We got past the tough parts.
- 
+   toplay = Zero1;
 }
 
 /////////////////// LOOP FUNCTION ///////////////////////// 
@@ -135,7 +144,8 @@ void loop() {
   float highestAngle1[1];
   float changeInAnglesTotals[1];
   float value[5];
-  
+  int delaylength;
+    
   value[0] = 30;
   value[1] = 50;
   value[2] = 100;
@@ -145,6 +155,11 @@ void loop() {
   anglesTotal[0] = abs(angles[0] - angles2[0]); //Gives total change in x axis
   anglesTotal[1] = abs(angles[1] - angles2[1]); //Gives total change in y axis
   anglesTotal[2] = abs(angles[2] - angles2[2]); //gives total change in z axis
+  
+//  Serial.println(anglesTotal[0]);
+//  Serial.println(anglesTotal[1]);
+//  Serial.println(anglesTotal[2]);
+  
   
   //Statement to decide what angle is greatest to decide what sound to play
   if(anglesTotal[0] > anglesTotal[1])
@@ -171,55 +186,60 @@ void loop() {
   }
   
    changeInAnglesTotals[0] = abs(highestAngle1[0] - highestAngle2[0]);
-   Serial.println(highestAngle1[0]);
-   Serial.println(highestAngle2[0]);
-   Serial.println(changeInAnglesTotals[0]);
-   
+
   if(highestAngle1[0] <= value[0] && changeInAnglesTotals[0] > value[4])
   {
-    playfile("Clash2.WAV");
-    delay(175);
+   toplay = C1;
+   delaylength = 400;
   }
   else
   {
     if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4])
     {  
-      playfile("Minus801.WAV");
-      delay(75);
+      toplay =ME1;
+      delaylength = 150;
     }
     if(highestAngle1[0] <= value[1] && highestAngle1[0] > value[0])
     {
-      playfile("Minus401.WAV");
-      delay(75);
+      toplay = MF1;
+      delaylength = 150;
     }
     if(highestAngle1[0] <= value[2] && highestAngle1[0] > value[1])
     {
-      playfile("Zero1.WAV");
-      delay(75);
+      toplay = Zero1;
+      delaylength = 10;
     }
     if(highestAngle1[0] <=value[3] && highestAngle1[0] > value[2])
     {
-      playfile("Plus401.WAV");
-      delay(75);
+      toplay = PF1;
+      delaylength = 150;
     }
     if(highestAngle1[0] > value[3])
     {
-      playfile("Plus801.WAV");
-      delay(75);
+      toplay = PE1;
+      delaylength = 150;
     }
   }
   
-
+    if(toplay != toplay1 || !wave.isplaying)
+  {
+   wave.stop(); 
+   playfile(toplay);
+  }  
+  
+  delay(delaylength);
+  
   angles2[0] = angles[0]; //initializes x angle2 to the previous x angle for total
   angles2[1] = angles[1]; //initializes y angle2 to the previous y angle for total
   angles2[2] = angles[2]; //initializes z angle2 to the previous z angle for total
   highestAngle2[0] = highestAngle1[0]; //initializes change so we know whether to play hum or clash
   // Use playcomplete("SOUND.WAV") or playfile("SOUND.WAV") to call a sound to play 
-  Serial.println(highestAngle2[0]);
-  Serial.println();
-  delay(100); // this delay is to simulate 100ms read increment
-}
-
+    
+  anglesTotal[0] = abs(angles[0] - angles2[0]); //Gives total change in x axis
+  anglesTotal[1] = abs(angles[1] - angles2[1]); //Gives total change in y axis
+  anglesTotal[2] = abs(angles[2] - angles2[2]); //gives total change in z axis
+  toplay1 = toplay;
+}  
 /////////// BEGIN WAVE SHIELD SUPPORT FUNCTIONS ///////////
   
 // Plays a full file from beginning to end with no pause. (To be used for CLASH and START/STOP)
@@ -240,14 +260,15 @@ void playfile(char *name) {
   }
   // look in the root directory and open the file
   if (!f.open(root, name)) {
-    Serial.print("Couldn't open file "); Serial.print(name); return;
+//    Serial.print("Couldn't open file "); Serial.println(name); return;
   }
   // OK read the file and turn it into a wave object
   if (!wave.create(f)) {
-    Serial.println("Not a valid WAV"); return;
+//    Serial.println("Not a valid WAV"); return;
   }
   
   // ok time to play! start playback
   wave.play();
 }
+
 
