@@ -186,6 +186,7 @@ void loop() {
   }
   
    changeInAnglesTotals[0] = abs(highestAngle1[0] - highestAngle2[0]);
+   Serial.println(changeInAnglesTotals[0]);
 
   if(highestAngle1[0] <= value[0] && changeInAnglesTotals[0] > value[4])
   {
@@ -196,13 +197,13 @@ void loop() {
   {
     if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4])
     {  
-      toplay =ME1;
-      delaylength = 150;
+      toplay = ME1;
+      delaylength = 200;
     }
     if(highestAngle1[0] <= value[1] && highestAngle1[0] > value[0])
     {
       toplay = MF1;
-      delaylength = 150;
+      delaylength = 200;
     }
     if(highestAngle1[0] <= value[2] && highestAngle1[0] > value[1])
     {
@@ -212,12 +213,12 @@ void loop() {
     if(highestAngle1[0] <=value[3] && highestAngle1[0] > value[2])
     {
       toplay = PF1;
-      delaylength = 150;
+      delaylength = 200;
     }
     if(highestAngle1[0] > value[3])
     {
       toplay = PE1;
-      delaylength = 150;
+      delaylength = 200;
     }
   }
   
@@ -226,6 +227,7 @@ void loop() {
    wave.stop(); 
    playfile(toplay);
   }  
+  
   
   delay(delaylength);
   
