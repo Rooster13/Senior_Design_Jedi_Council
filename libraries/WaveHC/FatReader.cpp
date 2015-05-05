@@ -76,7 +76,7 @@ void FatReader::lsR(dir_t &d, uint8_t flags, uint8_t indent) {
     printEntryName(d);
 
     if (DIR_IS_SUBDIR(d)) {
-      Serial.println();
+      //Serial.println();
       // recursive call if LS_R
       if (flags & LS_R) {
         FatReader s;
@@ -97,9 +97,9 @@ void FatReader::lsR(dir_t &d, uint8_t flags, uint8_t indent) {
       }
       if (flags & LS_SIZE) {
         Serial.write(' ');
-        Serial.print(d.fileSize);
+        //Serial.print(d.fileSize);
       }
-      Serial.println();
+      //Serial.println();
     }
   }
 }

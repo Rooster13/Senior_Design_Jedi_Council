@@ -140,9 +140,13 @@ void setup() {
 /////////////////// LOOP FUNCTION ///////////////////////// 
 void loop() {
  // ADD ALL PROCESSING CODE HERE
- playcomplete("TARDISMV.WAV");
-  Serial.println();
-  delay(100); // this delay is to simulate 100ms read increment
+ playfile("TARDISMV.WAV");
+  Serial.println("50");
+  delay(1000); // this delay is to simulate 100ms read increment
+  
+   playfile("TARDISHM.WAV");
+  Serial.println("70");
+  delay(1000); //
 }
 
 /////////// BEGIN WAVE SHIELD SUPPORT FUNCTIONS ///////////

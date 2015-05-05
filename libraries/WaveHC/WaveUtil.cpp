@@ -38,5 +38,5 @@ void SerialPrint_P(PGM_P str) {
  */
 void SerialPrintln_P(PGM_P str) {
   SerialPrint_P(str);
-  Serial.println();
+  //Serial.println();
 }

@@ -32,11 +32,11 @@
 #include <WaveUtil.h>
 
 #define C1 "C1.WAV"
-#define ME1 "ME2.WAV"
-#define MF1 "MF2.WAV"
-#define Zero1 "Zero1.WAV"
-#define PE1 "PE2.WAV"
-#define PF1 "PF2.WAV"
+#define ME1 "F.WAV"
+#define MF1 "H.WAV"
+#define Zero1 "HF.WAV"
+#define PE1 "S.WAV"
+#define PF1 "TH.WAV"
 
 /////// BEGIN IMU INCLUDE STATEMENTS ///////////
 #include <FreeSixIMU.h>
@@ -50,15 +50,18 @@ SdReader card;    // This object holds the information for the card
 FatReader root;   // This holds the information for the filesystem on the card
 FatReader f;      // This holds the information for the file we're play 
 WaveHC wave;      // This is the only wave (audio) object, since we will only play one at a time
-WaveHC wave2;      // This is the only wave (audio) object, since we will only play one at a time
 FatVolume vol;    // This holds the information for the partition on the card 
 char *toplay, *toplay1;
 ////////// BEGIN IMU INSTANTIATIONS ///////////
-float angles[3]; // yaw pitch roll
-float angles2[3];
+
+float angles2[3] ;
 float highestAngle2[1];
 // Set the FreeSixIMU object
 FreeSixIMU sixDOF = FreeSixIMU();
+// On/Off state
+boolean onoff=true;
+//Pin Def
+#define TOUCH_PIN 1
 
 /////////////////////// BEGIN FUNCTION DEFINITIONS /////////////////////////////
 
@@ -135,22 +138,69 @@ void setup() {
   
   // Whew! We got past the tough parts.
    toplay = Zero1;
+   
+   // attach interrupt function for cap touch button
+//   attachInterrupt(TOUCH_PIN, onOffISR, RISING);
 }
+
+/////////////////// ISR FUNCTION //////////////////////////
+//void onOffISR()
+//{
+//  if (onoff)
+//  {
+//    //turn off sequence goes here
+//    digitalWrite(6, LOW);
+//    delay(100);
+//    digitalWrite(5, LOW);
+//    delay(100);
+//    digitalWrite(8, LOW);
+//    delay(100);
+//    digitalWrite(9, LOW);
+//    delay(100);
+//    digitalWrite(7, LOW);
+//    delay(100);
+//    digitalWrite(A0, LOW);
+//    delay(100);
+//  }
+//  else
+//  {
+//    digitalWrite(A0, HIGH);
+//    delay(100);
+//    digitalWrite(7, HIGH);
+//    delay(100);
+//    digitalWrite(9, HIGH);
+//    delay(100);
+//    digitalWrite(8, HIGH);
+//    delay(100);
+//    digitalWrite(5, HIGH);
+//    delay(100);
+//    digitalWrite(6, HIGH);
+//    delay(100);
+//    
+//    //turn on sequence goes here
+//  }
+//  onoff = !onoff;
+//}
 
 /////////////////// LOOP FUNCTION ///////////////////////// 
 void loop() {
+  if (!onoff)
+  {
+    return;
+  }
+  float angles[3]; // yaw pitch roll
   sixDOF.getEuler(angles);
   float anglesTotal[3];
   float highestAngle1[1];
-  float changeInAnglesTotals[1];
-  float value[5];
+  float changeInAnglesTotals[1], changeInAnglesTotal2[1];
+  int value[5];
   int delaylength;
     
-  value[0] = 30;
-  value[1] = 50;
-  value[2] = 100;
-  value[3] = 200;
-  value[4] = 60;
+  value[0] = 10; //Value for clash and low hum
+  value[1] = 30; //Value threshhold for hum 2
+  value[2] = 60; //Value threshhold for hum 4
+  value[3] = 80; //Value threshhold for Clash
+  value[4] = 200; //Value threshhold for hum 3
     
   anglesTotal[0] = abs(angles[0] - angles2[0]); //Gives total change in x axis
   anglesTotal[1] = abs(angles[1] - angles2[1]); //Gives total change in y axis
@@ -185,44 +235,44 @@ void loop() {
     }
   }
   
-   changeInAnglesTotals[0] = abs(highestAngle1[0] - highestAngle2[0]);
-   Serial.println(changeInAnglesTotals[0]);
+   changeInAnglesTotals[0] = abs(highestAngle1[0] - highestAngle2[0]); //tells us how the angles have changed to be used to determine what sound is played
+   Serial.println(changeInAnglesTotals[0]); //lets us see the change in angles
 
-  if(highestAngle1[0] <= value[0] && changeInAnglesTotals[0] > value[4])
+  if(highestAngle1[0] <= value[0] && changeInAnglesTotals[0] > value[4]) //if there is a sudden stop and the change is great signifying a clash 
   {
-   toplay = C1;
-   delaylength = 400;
+   toplay = C1; //Plays clash sound
+   delaylength = 400; //longer delay length to play entire clash
   }
   else
   {
-    if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4])
+    if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4]) //if sounds are between these values shoudl be lowest hum
     {  
-      toplay = ME1;
-      delaylength = 200;
+      toplay = ME1; //hum1
+      delaylength = 100;
     }
-    if(highestAngle1[0] <= value[1] && highestAngle1[0] > value[0])
+    if(highestAngle1[0] <= value[1] && highestAngle1[0] > value[0]) //if sounds are between these values shoudl be low to mid hum
     {
-      toplay = MF1;
-      delaylength = 200;
+      toplay = MF1; //hum2
+      delaylength = 100;
     }
-    if(highestAngle1[0] <= value[2] && highestAngle1[0] > value[1])
+    if(highestAngle1[0] <= value[2] && highestAngle1[0] > value[1]) //if sounds are between these values shoudl be medium hum
     {
-      toplay = Zero1;
-      delaylength = 10;
+      toplay = Zero1; //hum3
+      delaylength = 100;
     }
-    if(highestAngle1[0] <=value[3] && highestAngle1[0] > value[2])
+    if(highestAngle1[0] <=value[3] && highestAngle1[0] > value[2]) //if sounds are between these values should be mid to high hum
     {
-      toplay = PF1;
-      delaylength = 200;
+      toplay = PF1; //hum4
+      delaylength = 100;
     }
-    if(highestAngle1[0] > value[3])
+    if(highestAngle1[0] > value[3]) //if sounds are between these values shoudl be highest hum
     {
-      toplay = PE1;
-      delaylength = 200;
+      toplay = PE1; //hum5
+      delaylength = 100;
     }
   }
   
-    if(toplay != toplay1 || !wave.isplaying)
+    if(toplay != toplay1 || !wave.isplaying) //if a different wav file needs to be played then stop the current wav file and play the new one
   {
    wave.stop(); 
    playfile(toplay);
@@ -240,6 +290,7 @@ void loop() {
   anglesTotal[0] = abs(angles[0] - angles2[0]); //Gives total change in x axis
   anglesTotal[1] = abs(angles[1] - angles2[1]); //Gives total change in y axis
   anglesTotal[2] = abs(angles[2] - angles2[2]); //gives total change in z axis
+  changeInAnglesTotal2[0] = changeInAnglesTotals[0];
   toplay1 = toplay;
 }  
 /////////// BEGIN WAVE SHIELD SUPPORT FUNCTIONS ///////////
