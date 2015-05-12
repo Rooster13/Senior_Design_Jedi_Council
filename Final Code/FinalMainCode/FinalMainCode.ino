@@ -31,6 +31,13 @@
 #include <WavePinDefs.h>
 #include <WaveUtil.h>
 
+#define C1 "C1.WAV"
+#define ME1 "F.WAV"
+#define MF1 "H.WAV"
+#define Zero1 "HF.WAV"
+#define PE1 "S.WAV"
+#define PF1 "TH.WAV"
+
 /////// BEGIN IMU INCLUDE STATEMENTS ///////////
 #include <FreeSixIMU.h>
 #include <FIMU_ADXL345.h>
@@ -44,12 +51,17 @@ FatReader root;   // This holds the information for the filesystem on the card
 FatReader f;      // This holds the information for the file we're play 
 WaveHC wave;      // This is the only wave (audio) object, since we will only play one at a time
 FatVolume vol;    // This holds the information for the partition on the card 
+char *toplay, *toplay1;
 ////////// BEGIN IMU INSTANTIATIONS ///////////
-float angles[3]; // yaw pitch roll
-float angles2[3];
+
+float angles2[3] ;
 float highestAngle2[1];
 // Set the FreeSixIMU object
 FreeSixIMU sixDOF = FreeSixIMU();
+// On/Off state
+boolean onoff=true;
+//Pin Def
+#define TOUCH_PIN 1
 
 /////////////////////// BEGIN FUNCTION DEFINITIONS /////////////////////////////
 
@@ -66,7 +78,7 @@ void sdErrorCheck(void)
 ///////////// SETUP FUNCTION /////////////// 
 void setup() {
   // Prescale internal clock for slow-down (for use at 3.3V)
-  
+ 
   CLKPR = 0x80;
   CLKPR = 0x1;
  
@@ -78,7 +90,7 @@ void setup() {
   delay(5);
   sixDOF.init(); //begin the IMU
   delay(5);
-  Serial.println("Hello2!");
+  
   // Set the output pins for the DAC control. This pins are defined in the library
   pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
@@ -125,26 +137,79 @@ void setup() {
   }
   
   // Whew! We got past the tough parts.
-
+   toplay = Zero1;
+   
+   // attach interrupt function for cap touch button
+//   attachInterrupt(TOUCH_PIN, onOffISR, RISING);
 }
+
+/////////////////// ISR FUNCTION //////////////////////////
+//void onOffISR()
+//{
+//  if (onoff)
+//  {
+//    //turn off sequence goes here
+//    digitalWrite(6, LOW);
+//    delay(100);
+//    digitalWrite(5, LOW);
+//    delay(100);
+//    digitalWrite(8, LOW);
+//    delay(100);
+//    digitalWrite(9, LOW);
+//    delay(100);
+//    digitalWrite(7, LOW);
+//    delay(100);
+//    digitalWrite(A0, LOW);
+//    delay(100);
+//  }
+//  else
+//  {
+//    digitalWrite(A0, HIGH);
+//    delay(100);
+//    digitalWrite(7, HIGH);
+//    delay(100);
+//    digitalWrite(9, HIGH);
+//    delay(100);
+//    digitalWrite(8, HIGH);
+//    delay(100);
+//    digitalWrite(5, HIGH);
+//    delay(100);
+//    digitalWrite(6, HIGH);
+//    delay(100);
+//    
+//    //turn on sequence goes here
+//  }
+//  onoff = !onoff;
+//}
 
 /////////////////// LOOP FUNCTION ///////////////////////// 
 void loop() {
+  if (!onoff)
+  {
+    return;
+  }
+  float angles[3]; // yaw pitch roll
   sixDOF.getEuler(angles);
   float anglesTotal[3];
   float highestAngle1[1];
-  float changeInAnglesTotals[1];
-  float value[5];
- 
-  value[0] = 30;
-  value[1] = 50;
-  value[2] = 100;
-  value[3] = 200;
-  value[4] = 60;
+  float changeInAnglesTotals[1], changeInAnglesTotal2[1];
+  int value[5];
+  int delaylength;
+    
+  value[0] = 10; //Value for clash and low hum
+  value[1] = 30; //Value threshhold for hum 2
+  value[2] = 60; //Value threshhold for hum 4
+  value[3] = 80; //Value threshhold for Clash
+  value[4] = 200; //Value threshhold for hum 3
     
   anglesTotal[0] = abs(angles[0] - angles2[0]); //Gives total change in x axis
   anglesTotal[1] = abs(angles[1] - angles2[1]); //Gives total change in y axis
   anglesTotal[2] = abs(angles[2] - angles2[2]); //gives total change in z axis
+  
+//  Serial.println(anglesTotal[0]);
+//  Serial.println(anglesTotal[1]);
+//  Serial.println(anglesTotal[2]);
+  
   
   //Statement to decide what angle is greatest to decide what sound to play
   if(anglesTotal[0] > anglesTotal[1])
@@ -170,56 +235,64 @@ void loop() {
     }
   }
   
-   changeInAnglesTotals[0] = abs(highestAngle1[0] - highestAngle2[0]);
-   Serial.println(highestAngle1[0]);
-   Serial.println(highestAngle2[0]);
-   Serial.println(changeInAnglesTotals[0]);
-   
-  if(highestAngle1[0] <= value[0] && changeInAnglesTotals[0] > value[4])
+   changeInAnglesTotals[0] = abs(highestAngle1[0] - highestAngle2[0]); //tells us how the angles have changed to be used to determine what sound is played
+   Serial.println(changeInAnglesTotals[0]); //lets us see the change in angles
+
+  if(highestAngle1[0] <= value[0] && changeInAnglesTotals[0] > value[4]) //if there is a sudden stop and the change is great signifying a clash 
   {
-    playfile("C1.WAV");
-    delay(200);
+   toplay = C1; //Plays clash sound
+   delaylength = 400; //longer delay length to play entire clash
   }
   else
   {
-    if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4])
+    if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4]) //if sounds are between these values shoudl be lowest hum
     {  
-      playfile("ME1.WAV");
-      delay(100);
+      toplay = ME1; //hum1
+      delaylength = 100;
     }
-    if(highestAngle1[0] <= value[1] && highestAngle1[0] > value[0])
+    if(highestAngle1[0] <= value[1] && highestAngle1[0] > value[0]) //if sounds are between these values shoudl be low to mid hum
     {
-      playfile("MF1.WAV");
-      delay(100);
+      toplay = MF1; //hum2
+      delaylength = 100;
     }
-    if(highestAngle1[0] <= value[2] && highestAngle1[0] > value[1])
+    if(highestAngle1[0] <= value[2] && highestAngle1[0] > value[1]) //if sounds are between these values shoudl be medium hum
     {
-      playfile("Zero1.WAV");
-      delay(100);
+      toplay = Zero1; //hum3
+      delaylength = 100;
     }
-    if(highestAngle1[0] <=value[3] && highestAngle1[0] > value[2])
+    if(highestAngle1[0] <=value[3] && highestAngle1[0] > value[2]) //if sounds are between these values should be mid to high hum
     {
-      playfile("PF1.WAV");
-      delay(100);
+      toplay = PF1; //hum4
+      delaylength = 100;
     }
-    if(highestAngle1[0] > value[3])
+    if(highestAngle1[0] > value[3]) //if sounds are between these values shoudl be highest hum
     {
-      playfile("PE1.WAV");
-      delay(100);
+      toplay = PE1; //hum5
+      delaylength = 100;
     }
   }
   
-
+    if(toplay != toplay1 || !wave.isplaying) //if a different wav file needs to be played then stop the current wav file and play the new one
+  {
+   wave.stop(); 
+   playfile(toplay);
+  }  
+  
+  
+  delay(delaylength);
+  
   angles2[0] = angles[0]; //initializes x angle2 to the previous x angle for total
   angles2[1] = angles[1]; //initializes y angle2 to the previous y angle for total
   angles2[2] = angles[2]; //initializes z angle2 to the previous z angle for total
   highestAngle2[0] = highestAngle1[0]; //initializes change so we know whether to play hum or clash
   // Use playcomplete("SOUND.WAV") or playfile("SOUND.WAV") to call a sound to play 
-  Serial.println(highestAngle2[0]);
-  Serial.println();
-  delay(100); // this delay is to simulate 100ms read increment
-}
-
+    
+  anglesTotal[0] = abs(angles[0] - angles2[0]); //Gives total change in x axis
+  anglesTotal[1] = abs(angles[1] - angles2[1]); //Gives total change in y axis
+  anglesTotal[2] = abs(angles[2] - angles2[2]); //gives total change in z axis
+  changeInAnglesTotal2[0] = changeInAnglesTotals[0];
+  toplay1 = toplay;
+}  
 /////////// BEGIN WAVE SHIELD SUPPORT FUNCTIONS ///////////
   
 // Plays a full file from beginning to end with no pause. (To be used for CLASH and START/STOP)
@@ -240,14 +313,15 @@ void playfile(char *name) {
   }
   // look in the root directory and open the file
   if (!f.open(root, name)) {
-    Serial.print("Couldn't open file "); Serial.print(name); return;
+//    Serial.print("Couldn't open file "); Serial.println(name); return;
   }
   // OK read the file and turn it into a wave object
   if (!wave.create(f)) {
-    Serial.println("Not a valid WAV"); return;
+//    Serial.println("Not a valid WAV"); return;
   }
   
   // ok time to play! start playback
   wave.play();
 }
+
 
