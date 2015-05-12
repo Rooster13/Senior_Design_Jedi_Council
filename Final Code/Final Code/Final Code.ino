@@ -195,12 +195,18 @@ void loop() {
   float changeInAnglesTotals[1], changeInAnglesTotal2[1];
   int value[5];
   int delaylength;
-    
+  
+  ////////////// BEGIN LIMIT VALUE DEFINITIONS /////////////////
+  /// PLEASE DO NOT CHANGE ANY CODE OUTSIDE OF THIS BLOCK!!! ///  
+  
   value[0] = 10; //Value for clash and low hum
   value[1] = 30; //Value threshhold for hum 2
-  value[2] = 60; //Value threshhold for hum 4
-  value[3] = 80; //Value threshhold for Clash
-  value[4] = 200; //Value threshhold for hum 3
+  value[2] = 60; //Value threshhold for hum 3
+  value[3] = 80; //Value threshhold for hum 4
+  value[4] = 200; //Value threshhold for clash
+  
+  ////////////// END LIMIT VALUE DEFINITIONS ///////////////////
+  /// PLEASE DO NOT CHANGE ANY CODE OUTSIDE OF THIS BLOCK!!! ///
     
   anglesTotal[0] = abs(angles[0] - angles2[0]); //Gives total change in x axis
   anglesTotal[1] = abs(angles[1] - angles2[1]); //Gives total change in y axis
@@ -243,6 +249,7 @@ void loop() {
    toplay = C1; //Plays clash sound
    delaylength = 400; //longer delay length to play entire clash
   }
+  
   else
   {
     if(highestAngle1[0] <=value[0] && changeInAnglesTotals[0] < value[4]) //if sounds are between these values shoudl be lowest hum
