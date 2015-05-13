@@ -145,15 +145,15 @@ void setup() {
   }
   
   digitalWrite(A0, HIGH);
-  delay(50);
+  delay(25);
   digitalWrite(A1, HIGH);
-  delay(50);
+  delay(25);
   digitalWrite(6, HIGH);
-  delay(50);
+  delay(25);
   digitalWrite(7, HIGH);
-  delay(50);
+  delay(25);
   digitalWrite(8, HIGH);
-  delay(50);
+  delay(25);
   digitalWrite(9, HIGH);
   playcomplete("SO.WAV");
   
